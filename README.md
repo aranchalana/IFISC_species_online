@@ -1,0 +1,2 @@
+# IFISC_species_online
+Streamlit script to search for species at multi database, using single or txt species and with Claude or local model option. Includes the download and mapper option.
