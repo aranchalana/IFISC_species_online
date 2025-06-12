@@ -6,4 +6,4 @@ conda activate biodiversity
 
 streamlit run biodiversity_streamlit_app_v2.py
 
-streamlit run complete_biodiversity_app.py 
+streamlit run complete_biodiversity_app_v2.py 
