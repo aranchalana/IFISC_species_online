@@ -10,7 +10,7 @@ This application combines:
 - Comprehensive data analysis and reporting
 
 Author: Biodiversity Research Tool
-Version: 1.1 (with Ollama integration)
+Version: 1.1 (Professional Edition)
 Date: 2024
 """
 
@@ -44,58 +44,70 @@ warnings.filterwarnings('ignore')
 # Configure Streamlit page
 st.set_page_config(
     page_title="Biodiversity Research Pipeline",
-    page_icon="🐠",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
+# Professional CSS styling
 st.markdown("""
 <style>
 .main-header {
-    font-size: 2.5rem;
-    color: #1f77b4;
+    font-size: 2.2rem;
+    color: #2c3e50;
     text-align: center;
     margin-bottom: 2rem;
-    padding: 1rem;
-    background: linear-gradient(90deg, #e8f4fd, #b3d9ff);
-    border-radius: 10px;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    font-weight: 600;
 }
 .sub-header {
-    font-size: 1.3rem;
-    color: #2c3e50;
-    margin: 1rem 0;
-    padding: 0.5rem;
-    border-left: 4px solid #3498db;
+    font-size: 1.4rem;
+    color: #495057;
+    margin: 1.5rem 0;
+    padding: 0.8rem;
+    border-left: 4px solid #007bff;
     background: #f8f9fa;
+    font-weight: 500;
 }
 .success-box {
-    background: #d4edda;
-    border: 1px solid #c3e6cb;
-    border-radius: 5px;
+    background: #d1ecf1;
+    border: 1px solid #bee5eb;
+    border-radius: 6px;
     padding: 1rem;
     margin: 1rem 0;
+    color: #0c5460;
 }
 .warning-box {
     background: #fff3cd;
     border: 1px solid #ffeaa7;
-    border-radius: 5px;
+    border-radius: 6px;
     padding: 1rem;
     margin: 1rem 0;
+    color: #856404;
 }
 .error-box {
     background: #f8d7da;
     border: 1px solid #f5c6cb;
-    border-radius: 5px;
+    border-radius: 6px;
     padding: 1rem;
     margin: 1rem 0;
+    color: #721c24;
 }
 .metric-card {
     background: white;
-    padding: 1rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1.2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     margin: 0.5rem 0;
+    border: 1px solid #e9ecef;
+}
+.info-text {
+    color: #6c757d;
+    font-style: italic;
+    font-size: 0.95rem;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -130,7 +142,7 @@ class OllamaExtractor:
         if max_papers:
             papers = papers[:max_papers]
         
-        st.write(f"🤖 **Extracting species data from {len(papers)} papers using Ollama ({self.model_name})**")
+        st.write(f"**Extracting species data from {len(papers)} papers using Ollama ({self.model_name})**")
         
         all_species_data = []
         progress_bar = st.progress(0)
@@ -138,7 +150,7 @@ class OllamaExtractor:
         
         for i, paper in enumerate(papers):
             try:
-                status_text.write(f"🔄 Processing paper {i+1}/{len(papers)}: {paper.get('title', 'Unknown')[:50]}...")
+                status_text.write(f"Processing paper {i+1}/{len(papers)}: {paper.get('title', 'Unknown')[:50]}...")
                 
                 # Create paper text
                 text_parts = []
@@ -208,11 +220,11 @@ JSON:"""
                     all_species_data.extend(species_data)
                     
                     if species_data:
-                        status_text.write(f"✅ Found {len(species_data)} species in this paper")
+                        status_text.write(f"Successfully extracted {len(species_data)} species from this paper")
                     else:
-                        status_text.write(f"⚠️ No species data extracted from this paper")
+                        status_text.write(f"No species data extracted from this paper")
                 else:
-                    status_text.write(f"❌ Ollama API error: {response.status_code}")
+                    status_text.write(f"Ollama API error: {response.status_code}")
                 
                 # Update progress
                 progress_value = min((i + 1), len(papers)) / len(papers)
@@ -222,13 +234,13 @@ JSON:"""
                 time.sleep(1)
                 
             except Exception as e:
-                status_text.write(f"❌ Error processing paper: {e}")
+                status_text.write(f"Error processing paper: {e}")
                 continue
         
         progress_bar.empty()
         status_text.empty()
         
-        st.write(f"✅ **Ollama extraction complete!** Found {len(all_species_data)} species entries")
+        st.write(f"**Ollama extraction complete.** Found {len(all_species_data)} species entries")
         return all_species_data
     
     def parse_llm_response(self, response_text: str, paper: Dict) -> List[Dict]:
@@ -338,7 +350,7 @@ class BiodiversityPipeline:
     
     def search_pubmed(self, species: str, max_results: int = 25, start_year: int = 2015, end_year: int = 2025) -> List[Dict]:
         """Search PubMed database"""
-        st.write(f"🔍 Searching PubMed for '{species}'...")
+        st.write(f"Searching PubMed for '{species}'...")
         
         base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
         query = f'("{species}"[Title/Abstract]) AND ("{start_year}"[PDAT] : "{end_year}"[PDAT])'
@@ -356,10 +368,10 @@ class BiodiversityPipeline:
             
             pmids = search_response.json().get('esearchresult', {}).get('idlist', [])
             if not pmids:
-                st.write("  ℹ️ No PubMed results found")
+                st.write("  No PubMed results found")
                 return []
             
-            st.write(f"  ✅ Found {len(pmids)} PubMed results")
+            st.write(f"  Found {len(pmids)} PubMed results")
             
             # Fetch details
             results = []
@@ -390,7 +402,7 @@ class BiodiversityPipeline:
                 time.sleep(0.5)
             
             progress_bar.empty()
-            st.write(f"  ✅ Successfully parsed {len(results)} PubMed papers")
+            st.write(f"  Successfully parsed {len(results)} PubMed papers")
             return results
             
         except Exception as e:
@@ -459,7 +471,7 @@ class BiodiversityPipeline:
     
     def search_crossref(self, species: str, max_results: int = 25, start_year: int = 2015, end_year: int = 2025) -> List[Dict]:
         """Search CrossRef database"""
-        st.write(f"🔍 Searching CrossRef for '{species}'...")
+        st.write(f"Searching CrossRef for '{species}'...")
         
         try:
             response = requests.get("https://api.crossref.org/works", params={
@@ -475,10 +487,10 @@ class BiodiversityPipeline:
             
             items = response.json().get('message', {}).get('items', [])
             if not items:
-                st.write("  ℹ️ No CrossRef results found")
+                st.write("  No CrossRef results found")
                 return []
             
-            st.write(f"  ✅ Found {len(items)} CrossRef results")
+            st.write(f"  Found {len(items)} CrossRef results")
             
             results = []
             for item in items:
@@ -486,7 +498,7 @@ class BiodiversityPipeline:
                 if paper_data:
                     results.append(paper_data)
             
-            st.write(f"  ✅ Successfully parsed {len(results)} CrossRef papers")
+            st.write(f"  Successfully parsed {len(results)} CrossRef papers")
             return results
             
         except Exception as e:
@@ -538,7 +550,7 @@ class BiodiversityPipeline:
     
     def search_biorxiv(self, species: str, max_results: int = 25, start_year: int = 2015, end_year: int = 2025) -> List[Dict]:
         """Search bioRxiv database"""
-        st.write(f"🔍 Searching bioRxiv for '{species}'...")
+        st.write(f"Searching bioRxiv for '{species}'...")
         
         try:
             start_date = f"{start_year}-01-01"
@@ -549,7 +561,7 @@ class BiodiversityPipeline:
             
             data = response.json()
             if 'collection' not in data:
-                st.write("  ℹ️ No bioRxiv results found")
+                st.write("  No bioRxiv results found")
                 return []
             
             # Filter by species name
@@ -568,10 +580,10 @@ class BiodiversityPipeline:
                     break
             
             if not filtered_papers:
-                st.write("  ℹ️ No relevant bioRxiv results found")
+                st.write("  No relevant bioRxiv results found")
                 return []
             
-            st.write(f"  ✅ Found {len(filtered_papers)} relevant bioRxiv results")
+            st.write(f"  Found {len(filtered_papers)} relevant bioRxiv results")
             
             results = []
             for paper in filtered_papers:
@@ -587,7 +599,7 @@ class BiodiversityPipeline:
                     'title': paper.get('title', '')
                 })
             
-            st.write(f"  ✅ Successfully parsed {len(results)} bioRxiv papers")
+            st.write(f"  Successfully parsed {len(results)} bioRxiv papers")
             return results
             
         except Exception as e:
@@ -596,7 +608,7 @@ class BiodiversityPipeline:
     
     def search_arxiv(self, species: str, max_results: int = 25, start_year: int = 2015, end_year: int = 2025) -> List[Dict]:
         """Search arXiv database"""
-        st.write(f"🔍 Searching arXiv for '{species}'...")
+        st.write(f"Searching arXiv for '{species}'...")
         
         try:
             response = requests.get("http://export.arxiv.org/api/query", params={
@@ -613,10 +625,10 @@ class BiodiversityPipeline:
             entries = root.findall('atom:entry', namespace)
             
             if not entries:
-                st.write("  ℹ️ No arXiv results found")
+                st.write("  No arXiv results found")
                 return []
             
-            st.write(f"  ✅ Found {len(entries)} arXiv results")
+            st.write(f"  Found {len(entries)} arXiv results")
             
             results = []
             for entry in entries:
@@ -624,7 +636,7 @@ class BiodiversityPipeline:
                 if paper_data:
                     results.append(paper_data)
             
-            st.write(f"  ✅ Successfully parsed {len(results)} arXiv papers")
+            st.write(f"  Successfully parsed {len(results)} arXiv papers")
             return results
             
         except Exception as e:
@@ -676,10 +688,10 @@ class BiodiversityPipeline:
     def search_scopus(self, species: str, api_key: str, max_results: int = 25, start_year: int = 2015, end_year: int = 2025, inst_token: str = None) -> List[Dict]:
         """Search Scopus database"""
         if not api_key:
-            st.write("  ⚠️ Skipping Scopus search (no API key)")
+            st.write("  Skipping Scopus search (no API key provided)")
             return []
         
-        st.write(f"🔍 Searching Scopus for '{species}'...")
+        st.write(f"Searching Scopus for '{species}'...")
         
         try:
             headers = {
@@ -700,10 +712,10 @@ class BiodiversityPipeline:
             
             entries = response.json().get('search-results', {}).get('entry', [])
             if not entries:
-                st.write("  ℹ️ No Scopus results found")
+                st.write("  No Scopus results found")
                 return []
             
-            st.write(f"  ✅ Found {len(entries)} Scopus results")
+            st.write(f"  Found {len(entries)} Scopus results")
             
             results = []
             for entry in entries:
@@ -719,7 +731,7 @@ class BiodiversityPipeline:
                     'title': entry.get('dc:title', '')
                 })
             
-            st.write(f"  ✅ Successfully parsed {len(results)} Scopus papers")
+            st.write(f"  Successfully parsed {len(results)} Scopus papers")
             return results
             
         except Exception as e:
@@ -767,7 +779,7 @@ class BiodiversityPipeline:
     def search_all_databases(self, species: str, start_year: int, end_year: int, max_results: int, 
                            scopus_key: str = None, scopus_token: str = None) -> List[Dict]:
         """Search all available databases"""
-        st.write(f"🔍 **Searching all databases for: {species}**")
+        st.write(f"**Searching all databases for: {species}**")
         
         all_papers = []
         
@@ -793,22 +805,22 @@ class BiodiversityPipeline:
                     results = search_func()
                     all_papers.extend(results)
                     database_results[db_name] = len(results)
-                    st.success(f"✅ {db_name}: {len(results)} papers found")
+                    st.success(f"{db_name}: {len(results)} papers found")
                 except Exception as e:
-                    st.error(f"❌ {db_name}: Error - {e}")
+                    st.error(f"{db_name}: Error - {e}")
                     database_results[db_name] = 0
                 
                 if i < len(search_functions) - 1:
                     time.sleep(1)
         
         # Remove duplicates
-        st.write(f"📊 **Total papers before deduplication:** {len(all_papers)}")
+        st.write(f"**Total papers before deduplication:** {len(all_papers)}")
         unique_papers = self.remove_duplicates(all_papers)
-        st.write(f"📊 **Unique papers after deduplication:** {len(unique_papers)}")
+        st.write(f"**Unique papers after deduplication:** {len(unique_papers)}")
         
         # Show database breakdown
         if unique_papers:
-            st.write("**📈 Papers by database:**")
+            st.write("**Papers by database:**")
             cols = st.columns(len(database_results))
             for i, (db, count) in enumerate(database_results.items()):
                 with cols[i]:
@@ -825,7 +837,7 @@ class BiodiversityPipeline:
         if max_papers:
             papers = papers[:max_papers]
         
-        st.write(f"🤖 **Extracting species data from {len(papers)} papers using Claude API**")
+        st.write(f"**Extracting species data from {len(papers)} papers using Claude API**")
         
         all_species_data = []
         progress_bar = st.progress(0)
@@ -839,7 +851,7 @@ class BiodiversityPipeline:
         
         for i, paper in enumerate(papers):
             try:
-                status_text.write(f"🔄 Processing paper {i+1}/{len(papers)}: {paper.get('title', 'Unknown')[:50]}...")
+                status_text.write(f"Processing paper {i+1}/{len(papers)}: {paper.get('title', 'Unknown')[:50]}...")
                 
                 # Create paper text
                 text_parts = []
@@ -908,7 +920,7 @@ class BiodiversityPipeline:
                         
                         if response.status_code == 429:
                             wait_time = min(2 ** attempt, 60)
-                            status_text.write(f"⏳ Rate limit hit. Waiting {wait_time} seconds...")
+                            status_text.write(f"Rate limit hit. Waiting {wait_time} seconds...")
                             time.sleep(wait_time)
                             continue
                             
@@ -920,7 +932,7 @@ class BiodiversityPipeline:
                     except Exception as e:
                         if attempt < max_retries - 1:
                             wait_time = min(2 ** attempt, 60)
-                            status_text.write(f"⚠️ Error: {e}. Retrying in {wait_time} seconds...")
+                            status_text.write(f"Error: {e}. Retrying in {wait_time} seconds...")
                             time.sleep(wait_time)
                         else:
                             raise
@@ -964,10 +976,10 @@ class BiodiversityPipeline:
                             all_species_data.append(clean_item)
                     
                     if result:
-                        status_text.write(f"✅ Found {len(result)} species in this paper")
+                        status_text.write(f"Successfully extracted {len(result)} species from this paper")
                     
                 except json.JSONDecodeError as e:
-                    status_text.write(f"⚠️ Could not parse Claude response for this paper")
+                    status_text.write(f"Could not parse Claude response for this paper")
                     continue
                 
                 # Update progress
@@ -979,18 +991,18 @@ class BiodiversityPipeline:
                     time.sleep(5)
                     
             except Exception as e:
-                status_text.write(f"❌ Error processing paper: {e}")
+                status_text.write(f"Error processing paper: {e}")
                 continue
         
         progress_bar.empty()
         status_text.empty()
         
-        st.write(f"✅ **Species extraction complete!** Found {len(all_species_data)} species entries")
+        st.write(f"**Species extraction complete.** Found {len(all_species_data)} species entries")
         return all_species_data
     
     def create_interactive_maps(self, species_data: pd.DataFrame):
         """Create interactive maps from species data"""
-        st.write("🗺️ **Creating interactive maps...**")
+        st.write("**Creating interactive maps...**")
         
         if species_data.empty:
             st.warning("No species data available for mapping")
@@ -1003,7 +1015,7 @@ class BiodiversityPipeline:
         unique_locations = species_data['location'].unique()
         location_coords = {}
         
-        st.write(f"📍 Geocoding {len(unique_locations)} unique locations...")
+        st.write(f"Geocoding {len(unique_locations)} unique locations...")
         geocoding_progress = st.progress(0)
         
         for i, location in enumerate(unique_locations):
@@ -1032,13 +1044,13 @@ class BiodiversityPipeline:
             st.warning("Could not geocode any locations")
             return {}
         
-        st.write(f"✅ Successfully geocoded {len(location_coords)} locations")
+        st.write(f"Successfully geocoded {len(location_coords)} locations")
         
         # Create maps
         maps = {}
         
         # 1. Species Distribution Map
-        st.write("📊 Creating species distribution map...")
+        st.write("Creating species distribution map...")
         
         # Calculate center
         lats = [coord['lat'] for coord in location_coords.values()]
@@ -1062,7 +1074,7 @@ class BiodiversityPipeline:
                 # Create popup content
                 popup_html = f"""
                 <div style="width: 300px;">
-                    <h4>📍 {location}</h4>
+                    <h4>{location}</h4>
                     <p><strong>Species found:</strong> {species_count}</p>
                     <p><strong>Total records:</strong> {len(location_data)}</p>
                     <hr>
@@ -1095,7 +1107,7 @@ class BiodiversityPipeline:
         maps['species_distribution'] = m_species
         
         # 2. Heatmap of species density
-        st.write("🔥 Creating species density heatmap...")
+        st.write("Creating species density heatmap...")
         
         m_heatmap = folium.Map(location=[center_lat, center_lon], zoom_start=6)
         
@@ -1113,39 +1125,39 @@ class BiodiversityPipeline:
         
         maps['heatmap'] = m_heatmap
         
-        st.write("✅ **Interactive maps created successfully!**")
+        st.write("**Interactive maps created successfully**")
         return maps
 
 def main():
     """Main Streamlit application"""
     
     # Header
-    st.markdown('<div class="main-header">🐠 Biodiversity Research Pipeline</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">Biodiversity Research Pipeline</div>', unsafe_allow_html=True)
     st.markdown("**Comprehensive tool for species literature search, AI-powered data extraction, and interactive mapping**")
-    st.markdown("*Now supports both Claude API and local Ollama models for cost-free, unlimited analysis!*")
+    st.markdown('<p class="info-text">Advanced research platform supporting both Claude API and local Ollama models for cost-effective, unlimited analysis</p>', unsafe_allow_html=True)
     
     # Sidebar for inputs
-    st.sidebar.markdown("### 🔧 Configuration")
+    st.sidebar.markdown("### Configuration")
     
     # API Keys and LLM Configuration
-    st.sidebar.markdown("#### 🤖 AI Configuration")
+    st.sidebar.markdown("#### AI Configuration")
     llm_option = st.sidebar.radio(
         "Choose AI Backend:",
         ["Claude API", "Ollama (Local)"],
-        help="Claude API requires internet and costs money. Ollama runs locally and is free."
+        help="Claude API requires internet connection and API usage costs. Ollama runs locally and is free."
     )
     
     if llm_option == "Claude API":
         claude_api_key = st.sidebar.text_input("Claude API Key", type="password", help="Required for species data extraction")
-        scopus_api_key = st.sidebar.text_input("Scopus API Key (Optional)", type="password", help="Optional - for additional academic papers")
+        scopus_api_key = st.sidebar.text_input("Scopus API Key (Optional)", type="password", help="Optional - provides access to additional academic papers")
         scopus_token = st.sidebar.text_input("Scopus Institutional Token (Optional)", type="password")
     else:  # Ollama
         claude_api_key = None  # Not needed for Ollama
-        scopus_api_key = st.sidebar.text_input("Scopus API Key (Optional)", type="password", help="Optional - for additional academic papers")
+        scopus_api_key = st.sidebar.text_input("Scopus API Key (Optional)", type="password", help="Optional - provides access to additional academic papers")
         scopus_token = st.sidebar.text_input("Scopus Institutional Token (Optional)", type="password")
         
         # Ollama configuration
-        st.sidebar.markdown("**🦙 Ollama Settings**")
+        st.sidebar.markdown("**Ollama Settings**")
         ollama_model = st.sidebar.selectbox(
             "Ollama Model:",
             ["llama3.1:8b", "llama3.1:13b", "llama3.1:70b", "mistral:7b", "codellama:7b"],
@@ -1154,28 +1166,28 @@ def main():
         ollama_url = st.sidebar.text_input("Ollama URL:", "http://localhost:11434")
         
         # Test Ollama connection
-        if st.sidebar.button("🔗 Test Ollama Connection"):
+        if st.sidebar.button("Test Ollama Connection"):
             extractor = OllamaExtractor(ollama_model, ollama_url)
             if extractor.test_connection():
-                st.sidebar.success("✅ Ollama is running and accessible!")
+                st.sidebar.success("Ollama is running and accessible")
                 # Test if model is available
                 try:
                     response = requests.get(f"{ollama_url}/api/tags", timeout=5)
                     if response.status_code == 200:
                         available_models = [model['name'] for model in response.json().get('models', [])]
                         if ollama_model in available_models:
-                            st.sidebar.success(f"✅ Model '{ollama_model}' is available!")
+                            st.sidebar.success(f"Model '{ollama_model}' is available")
                         else:
-                            st.sidebar.warning(f"⚠️ Model '{ollama_model}' not found. Available models: {', '.join(available_models)}")
-                            st.sidebar.info(f"💡 To download: `ollama pull {ollama_model}`")
+                            st.sidebar.warning(f"Model '{ollama_model}' not found. Available models: {', '.join(available_models)}")
+                            st.sidebar.info(f"To download: `ollama pull {ollama_model}`")
                 except:
-                    st.sidebar.warning("⚠️ Could not check available models")
+                    st.sidebar.warning("Could not check available models")
             else:
-                st.sidebar.error("❌ Cannot connect to Ollama")
-                st.sidebar.info("💡 Make sure Ollama is running: `ollama serve`")
+                st.sidebar.error("Cannot connect to Ollama")
+                st.sidebar.info("Make sure Ollama is running: `ollama serve`")
         
         # Show setup instructions
-        with st.sidebar.expander("📚 Ollama Setup Instructions"):
+        with st.sidebar.expander("Ollama Setup Instructions"):
             st.markdown("""
             **Quick Setup:**
             ```bash
@@ -1199,7 +1211,7 @@ def main():
             """)
     
     # Species input
-    st.sidebar.markdown("#### 🐠 Species Selection")
+    st.sidebar.markdown("#### Species Selection")
     input_method = st.sidebar.radio("Choose input method:", ["Single species", "Upload species list"])
     
     if input_method == "Single species":
@@ -1214,7 +1226,7 @@ def main():
             species_list = []
     
     # Search parameters
-    st.sidebar.markdown("#### 📅 Search Parameters")
+    st.sidebar.markdown("#### Search Parameters")
     start_year = st.sidebar.number_input("Start Year", min_value=1900, max_value=2025, value=2015)
     end_year = st.sidebar.number_input("End Year", min_value=1900, max_value=2025, value=2025)
     max_results = st.sidebar.number_input("Max papers per database", min_value=1, max_value=100, value=25)
@@ -1222,11 +1234,11 @@ def main():
                                                 help="Limit to control API usage and processing time")
     
     # Geographic area filter (optional)
-    st.sidebar.markdown("#### 🌍 Geographic Filter (Optional)")
+    st.sidebar.markdown("#### Geographic Filter (Optional)")
     area_filter = st.sidebar.text_input("Area of interest", placeholder="e.g., Mediterranean, North Atlantic")
     
     # Main content area
-    if st.sidebar.button("🚀 Start Analysis", type="primary"):
+    if st.sidebar.button("Start Analysis", type="primary"):
         if not species_list:
             st.error("Please provide at least one species name")
             return
@@ -1239,8 +1251,8 @@ def main():
         else:  # Ollama
             extractor = OllamaExtractor(ollama_model, ollama_url)
             if not extractor.test_connection():
-                st.error("❌ Cannot connect to Ollama. Make sure it's running with: `ollama serve`")
-                st.info("💡 See setup instructions in the sidebar")
+                st.error("Cannot connect to Ollama. Make sure it's running with: `ollama serve`")
+                st.info("See setup instructions in the sidebar")
                 return
         
         # Initialize pipeline
@@ -1256,7 +1268,7 @@ def main():
         
         # Process each species
         for i, species in enumerate(species_list):
-            species_status.write(f"🔍 **Processing species {i+1}/{total_species}: {species}**")
+            species_status.write(f"**Processing species {i+1}/{total_species}: {species}**")
             
             # Search databases
             search_results = pipeline.search_all_databases(
@@ -1292,7 +1304,7 @@ def main():
         # Display results
         if all_search_results:
             ai_backend = "Claude API" if llm_option == "Claude API" else f"Ollama ({ollama_model})"
-            st.success(f"✅ **Analysis complete using {ai_backend}!** Found {len(all_search_results)} papers and extracted {len(all_species_data)} species records")
+            st.success(f"**Analysis complete using {ai_backend}.** Found {len(all_search_results)} papers and extracted {len(all_species_data)} species records")
         else:
             st.warning("No results found. Try different species names or broader search parameters.")
     
@@ -1303,31 +1315,31 @@ def main():
 def display_results(search_results, species_data):
     """Display analysis results"""
     
-    st.markdown('<div class="sub-header">📊 Analysis Results</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Analysis Results</div>', unsafe_allow_html=True)
     
     # Summary metrics
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("📄 Papers Found", len(search_results) if search_results else 0)
+        st.metric("Papers Found", len(search_results) if search_results else 0)
     
     with col2:
-        st.metric("🐠 Species Records", len(species_data) if species_data else 0)
+        st.metric("Species Records", len(species_data) if species_data else 0)
     
     with col3:
         unique_species = len(set(item['species'] for item in species_data)) if species_data else 0
-        st.metric("🔬 Unique Species", unique_species)
+        st.metric("Unique Species", unique_species)
     
     with col4:
         unique_locations = len(set(item['location'] for item in species_data if item['location'] != 'Unknown')) if species_data else 0
-        st.metric("📍 Locations", unique_locations)
+        st.metric("Locations", unique_locations)
     
     # Tabs for different views
-    tab1, tab2, tab3, tab4 = st.tabs(["📄 Papers", "🐠 Species Data", "🗺️ Maps", "📥 Downloads"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Papers", "Species Data", "Maps", "Downloads"])
     
     with tab1:
         if search_results:
-            st.markdown("### 📄 Literature Search Results")
+            st.markdown("### Literature Search Results")
             papers_df = pd.DataFrame(search_results)
             
             # Display papers table
@@ -1338,10 +1350,10 @@ def display_results(search_results, species_data):
             )
             
             # Database breakdown
-            st.markdown("### 📊 Results by Database")
+            st.markdown("### Results by Database")
             db_counts = papers_df['database'].value_counts()
             fig, ax = plt.subplots(figsize=(10, 6))
-            db_counts.plot(kind='bar', ax=ax, color='skyblue')
+            db_counts.plot(kind='bar', ax=ax, color='steelblue')
             ax.set_title('Papers Found by Database')
             ax.set_xlabel('Database')
             ax.set_ylabel('Number of Papers')
@@ -1352,21 +1364,21 @@ def display_results(search_results, species_data):
     
     with tab2:
         if species_data:
-            st.markdown("### 🐠 Extracted Species Data")
+            st.markdown("### Extracted Species Data")
             species_df = pd.DataFrame(species_data)
             
             # Display species data table
             st.dataframe(species_df, use_container_width=True, height=400)
             
             # Species summary
-            st.markdown("### 📊 Species Summary")
+            st.markdown("### Species Summary")
             col1, col2 = st.columns(2)
             
             with col1:
                 # Top species by occurrence
                 species_counts = species_df['species'].value_counts().head(10)
                 fig, ax = plt.subplots(figsize=(10, 6))
-                species_counts.plot(kind='barh', ax=ax, color='lightgreen')
+                species_counts.plot(kind='barh', ax=ax, color='lightcoral')
                 ax.set_title('Top 10 Most Studied Species')
                 ax.set_xlabel('Number of Records')
                 st.pyplot(fig)
@@ -1384,7 +1396,7 @@ def display_results(search_results, species_data):
     
     with tab3:
         if species_data:
-            st.markdown("### 🗺️ Interactive Maps")
+            st.markdown("### Interactive Maps")
             
             # Create maps
             pipeline = BiodiversityPipeline()
@@ -1394,14 +1406,14 @@ def display_results(search_results, species_data):
             if maps:
                 # Species distribution map
                 if 'species_distribution' in maps:
-                    st.markdown("#### 📍 Species Distribution Map")
-                    st.markdown("*Blue circles show locations with species data. Larger circles indicate more species diversity.*")
+                    st.markdown("#### Species Distribution Map")
+                    st.markdown('<p class="info-text">Blue circles show locations with species data. Larger circles indicate more species diversity.</p>', unsafe_allow_html=True)
                     st_folium(maps['species_distribution'], width=700, height=500)
                 
                 # Heatmap
                 if 'heatmap' in maps:
-                    st.markdown("#### 🔥 Species Density Heatmap")
-                    st.markdown("*Heat intensity shows areas with higher species diversity.*")
+                    st.markdown("#### Species Density Heatmap")
+                    st.markdown('<p class="info-text">Heat intensity shows areas with higher species diversity.</p>', unsafe_allow_html=True)
                     st_folium(maps['heatmap'], width=700, height=500)
                 
                 st.session_state.maps_created = True
@@ -1411,7 +1423,7 @@ def display_results(search_results, species_data):
             st.info("No species data available for mapping. Run the analysis first.")
     
     with tab4:
-        st.markdown("### 📥 Download Results")
+        st.markdown("### Download Results")
         
         if search_results or species_data:
             # Create download files
@@ -1422,7 +1434,7 @@ def display_results(search_results, species_data):
             with col1:
                 if 'papers_csv' in downloads:
                     st.download_button(
-                        label="📄 Download Papers CSV",
+                        label="Download Papers CSV",
                         data=downloads['papers_csv'],
                         file_name=f"papers_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                         mime="text/csv"
@@ -1430,7 +1442,7 @@ def display_results(search_results, species_data):
                 
                 if 'species_csv' in downloads:
                     st.download_button(
-                        label="🐠 Download Species Data CSV",
+                        label="Download Species Data CSV",
                         data=downloads['species_csv'],
                         file_name=f"species_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                         mime="text/csv"
@@ -1439,7 +1451,7 @@ def display_results(search_results, species_data):
             with col2:
                 if 'complete_zip' in downloads:
                     st.download_button(
-                        label="📦 Download Complete Dataset (ZIP)",
+                        label="Download Complete Dataset (ZIP)",
                         data=downloads['complete_zip'],
                         file_name=f"biodiversity_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip",
                         mime="application/zip"
@@ -1495,7 +1507,7 @@ def create_summary_report(search_results, species_data):
     # Papers summary
     if search_results:
         papers_df = pd.DataFrame(search_results)
-        report.append("📄 LITERATURE SEARCH RESULTS:")
+        report.append("LITERATURE SEARCH RESULTS:")
         report.append(f"Total papers found: {len(search_results)}")
         
         # Database breakdown
@@ -1511,7 +1523,7 @@ def create_summary_report(search_results, species_data):
     # Species summary
     if species_data:
         species_df = pd.DataFrame(species_data)
-        report.append("\n🐠 SPECIES DATA EXTRACTION:")
+        report.append("\nSPECIES DATA EXTRACTION:")
         report.append(f"Total species records: {len(species_data)}")
         report.append(f"Unique species: {species_df['species'].nunique()}")
         report.append(f"Unique locations: {species_df['location'].nunique()}")
