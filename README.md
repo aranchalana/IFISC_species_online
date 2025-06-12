@@ -7,3 +7,5 @@ conda activate biodiversity
 streamlit run biodiversity_streamlit_app_v2.py
 
 streamlit run complete_biodiversity_app_v2.py 
+
+(complete_biodiversity_app_v2 includes Ollama and Claude options)
